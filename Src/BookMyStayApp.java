@@ -102,6 +102,18 @@ public class BookMyStayApp {
         }
         System.out.println();
 
+        // Use Case 11: Concurrent Booking Simulation (Thread Safety)
+        // Re-register inventory for simulation
+        RoomInventory simInventory = new RoomInventory();
+        simInventory.registerRoom(single, 10);
+        BookingService simBookingService = new BookingService();
+        try {
+            ConcurrentBookingDemo.runConcurrentDemo(simInventory, simBookingService);
+        } catch (InterruptedException ie) {
+            System.err.println("Concurrent demo interrupted: " + ie.getMessage());
+        }
+        System.out.println();
+
         // Use Case 7: Add-On Service Selection
         Service breakfast = new Service("Breakfast", 8.50);
         Service airport = new Service("Airport Pickup", 25.00);

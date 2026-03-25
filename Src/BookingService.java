@@ -16,7 +16,7 @@ public class BookingService {
     private final Map<String, Integer> counters = new HashMap<>();
     private final Map<String, Reservation> allocationMap = new HashMap<>();
 
-    private String generateRoomId(String roomType) {
+    private synchronized String generateRoomId(String roomType) {
         if (roomType == null) roomType = "ROOM";
         String base = roomType.replaceAll("\\s+", "").toUpperCase();
         int n = counters.getOrDefault(base, 0) + 1;
@@ -28,6 +28,21 @@ public class BookingService {
         allAllocatedIds.add(id);
         allocatedByType.computeIfAbsent(roomType, k -> new HashSet<>()).add(id);
         return id;
+    }
+
+    /**
+     * Thread-safe single allocation API. Returns assigned roomId or null if unavailable.
+     */
+    public synchronized String allocate(Reservation r, RoomInventory inventory) {
+        if (r == null || inventory == null) return null;
+        String type = r.getRoomType();
+        int avail = inventory.getAvailability(type);
+        if (avail <= 0) return null;
+        String roomId = generateRoomId(type);
+        // update inventory (inventory may be non-thread-safe, so we keep update inside synchronized block)
+        inventory.updateAvailability(type, -1);
+        allocationMap.put(roomId, r);
+        return roomId;
     }
 
     /**
@@ -83,7 +98,7 @@ public class BookingService {
     /**
      * Remove an allocation by room id. Returns true if removed.
      */
-    public boolean removeAllocation(String roomId) {
+    public synchronized boolean removeAllocation(String roomId) {
         if (roomId == null) return false;
         Reservation r = allocationMap.remove(roomId);
         if (r == null) return false;
