@@ -84,6 +84,26 @@ public class BookMyStayApp {
         System.out.println("Inventory after allocation: " + inventory.snapshot());
         System.out.println();
 
+        // Use Case 9: Error Handling & Validation
+        BookingValidator validator = new BookingValidator();
+        Reservation bad = new Reservation("", "", 0);
+        try {
+            validator.validateReservation(bad, inventory);
+            System.out.println("Bad reservation considered valid (unexpected)");
+        } catch (ValidationException ve) {
+            System.out.println("Validation failed as expected: " + ve.getMessage());
+        }
+
+        // Validate a good reservation (should pass)
+        Reservation good = new Reservation("Grace", single.getType(), 2);
+        try {
+            validator.validateReservation(good, inventory);
+            System.out.println("Validation passed for: " + good);
+        } catch (ValidationException ve) {
+            System.out.println("Unexpected validation failure: " + ve.getMessage());
+        }
+        System.out.println();
+
         // Use Case 8: Booking History & Reporting
         BookingHistory bookingHistory = new BookingHistory();
         // record confirmed reservations
