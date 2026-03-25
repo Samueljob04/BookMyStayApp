@@ -84,6 +84,27 @@ public class BookMyStayApp {
         System.out.println("Inventory after allocation: " + inventory.snapshot());
         System.out.println();
 
+        // Use Case 7: Add-On Service Selection
+        Service breakfast = new Service("Breakfast", 8.50);
+        Service airport = new Service("Airport Pickup", 25.00);
+
+        ServiceManager serviceManager = new ServiceManager();
+        // Attach services to allocation IDs produced earlier (if any)
+        for (String type : bookingService.getAllocations().keySet()) {
+            for (String allocId : bookingService.getAllocations().get(type)) {
+                serviceManager.addService(allocId, breakfast);
+                // add airport for suite only
+                if (type.toLowerCase().contains("suite")) serviceManager.addService(allocId, airport);
+            }
+        }
+
+        System.out.println("--- Services by Reservation (snapshot) ---");
+        System.out.println(serviceManager.snapshot());
+        for (Map.Entry<String, List<Service>> e : serviceManager.snapshot().entrySet()) {
+            System.out.println(e.getKey() + " total service cost: " + String.format("%.2f", serviceManager.totalServiceCost(e.getKey())));
+        }
+        System.out.println();
+
         // Run Use Case 1 logic (if present)
         // UC1 class in the same Src folder provides a run() method for the use case
         try {
