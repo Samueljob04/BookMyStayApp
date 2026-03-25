@@ -23,15 +23,17 @@ public class BookMyStayApp {
         DoubleRoom doub = new DoubleRoom();
         SuiteRoom suite = new SuiteRoom();
 
-        // Static availability variables (simple integers for demonstration)
-        int availableSingle = 5;
-        int availableDouble = 3;
-        int availableSuite = 1;
+        // Use Case 3: Centralized Room Inventory Management
+        RoomInventory inventory = new RoomInventory();
+        inventory.registerRoom(single, 5);
+        inventory.registerRoom(doub, 3);
+        inventory.registerRoom(suite, 1);
 
-        System.out.println("--- Room Types & Availability ---");
-        System.out.println(single + " -> Available: " + availableSingle);
-        System.out.println(doub + " -> Available: " + availableDouble);
-        System.out.println(suite + " -> Available: " + availableSuite);
+        System.out.println("--- Room Types & Inventory (snapshot) ---");
+        System.out.println(single + " -> Available: " + inventory.getAvailability(single.getType()));
+        System.out.println(doub + " -> Available: " + inventory.getAvailability(doub.getType()));
+        System.out.println(suite + " -> Available: " + inventory.getAvailability(suite.getType()));
+        System.out.println("Inventory snapshot: " + inventory.snapshot());
         System.out.println();
 
         // Run Use Case 1 logic (if present)
