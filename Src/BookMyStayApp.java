@@ -84,36 +84,22 @@ public class BookMyStayApp {
         System.out.println("Inventory after allocation: " + inventory.snapshot());
         System.out.println();
 
-        // Use Case 9: Error Handling & Validation
-        BookingValidator validator = new BookingValidator();
-        Reservation bad = new Reservation("", "", 0);
-        try {
-            validator.validateReservation(bad, inventory);
-            System.out.println("Bad reservation considered valid (unexpected)");
-        } catch (ValidationException ve) {
-            System.out.println("Validation failed as expected: " + ve.getMessage());
+        // Use Case 10: Booking Cancellation & Inventory Rollback
+        CancellationService cancellationService = new CancellationService();
+        // pick any allocated id to cancel (if exists)
+        String toCancel = null;
+        for (Set<String> s : bookingService.getAllocations().values()) {
+            if (!s.isEmpty()) { toCancel = s.iterator().next(); break; }
         }
-
-        // Validate a good reservation (should pass)
-        Reservation good = new Reservation("Grace", single.getType(), 2);
-        try {
-            validator.validateReservation(good, inventory);
-            System.out.println("Validation passed for: " + good);
-        } catch (ValidationException ve) {
-            System.out.println("Unexpected validation failure: " + ve.getMessage());
+        if (toCancel != null) {
+            System.out.println("Cancelling reservation with id: " + toCancel);
+            boolean ok = cancellationService.cancel(toCancel, bookingService, inventory, bookingHistory);
+            System.out.println("Cancellation success: " + ok);
+            System.out.println("Inventory after cancellation: " + inventory.snapshot());
+            System.out.println("Rollback stack: " + cancellationService.rollbackStack());
+        } else {
+            System.out.println("No allocations to cancel.");
         }
-        System.out.println();
-
-        // Use Case 8: Booking History & Reporting
-        BookingHistory bookingHistory = new BookingHistory();
-        // record confirmed reservations
-        for (Map.Entry<Reservation, String> e : allocations.entrySet()) {
-            if (e.getValue() != null) bookingHistory.record(e.getKey());
-        }
-
-        ReportService reportService = new ReportService();
-        reportService.printBookingHistory(bookingHistory);
-        reportService.printSummary(inventory.snapshot(), bookingHistory);
         System.out.println();
 
         // Use Case 7: Add-On Service Selection

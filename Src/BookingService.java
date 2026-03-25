@@ -14,6 +14,7 @@ public class BookingService {
     private final Map<String, Set<String>> allocatedByType = new HashMap<>();
     private final Set<String> allAllocatedIds = new HashSet<>();
     private final Map<String, Integer> counters = new HashMap<>();
+    private final Map<String, Reservation> allocationMap = new HashMap<>();
 
     private String generateRoomId(String roomType) {
         if (roomType == null) roomType = "ROOM";
@@ -47,6 +48,7 @@ public class BookingService {
             if (avail > 0) {
                 String roomId = generateRoomId(type);
                 inventory.updateAvailability(type, -1);
+                allocationMap.put(roomId, r);
                 result.put(r, roomId);
             } else {
                 result.put(r, null);
@@ -61,5 +63,33 @@ public class BookingService {
             copy.put(e.getKey(), Collections.unmodifiableSet(e.getValue()));
         }
         return Collections.unmodifiableMap(copy);
+    }
+
+    /**
+     * Find reservation associated with a room id, if any.
+     */
+    public Reservation getReservationForRoomId(String roomId) {
+        return allocationMap.get(roomId);
+    }
+
+    /**
+     * Find room type for a room id by consulting the reservation mapping.
+     */
+    public String findTypeByRoomId(String roomId) {
+        Reservation r = allocationMap.get(roomId);
+        return r != null ? r.getRoomType() : null;
+    }
+
+    /**
+     * Remove an allocation by room id. Returns true if removed.
+     */
+    public boolean removeAllocation(String roomId) {
+        if (roomId == null) return false;
+        Reservation r = allocationMap.remove(roomId);
+        if (r == null) return false;
+        allAllocatedIds.remove(roomId);
+        Set<String> set = allocatedByType.get(r.getRoomType());
+        if (set != null) set.remove(roomId);
+        return true;
     }
 }
