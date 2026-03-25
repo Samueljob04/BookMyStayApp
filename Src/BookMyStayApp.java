@@ -36,6 +36,12 @@ public class BookMyStayApp {
         System.out.println("Inventory snapshot: " + inventory.snapshot());
         System.out.println();
 
+        // Use Case 4: Room Search & Availability Check (read-only)
+        SearchService search = new SearchService();
+        var available = search.searchAvailable(inventory, single, doub, suite);
+        search.printResults(available, inventory);
+        System.out.println();
+
         // Run Use Case 1 logic (if present)
         // UC1 class in the same Src folder provides a run() method for the use case
         try {
