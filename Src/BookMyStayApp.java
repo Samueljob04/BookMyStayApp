@@ -42,6 +42,24 @@ public class BookMyStayApp {
         search.printResults(available, inventory);
         System.out.println();
 
+        // Use Case 5: Booking Request (First-Come-First-Served)
+        BookingQueue bookingQueue = new BookingQueue();
+        Reservation r1 = new Reservation("Alice", single.getType(), 2);
+        Reservation r2 = new Reservation("Bob", doub.getType(), 3);
+        Reservation r3 = new Reservation("Carol", suite.getType(), 1);
+
+        bookingQueue.submit(r1);
+        bookingQueue.submit(r2);
+        bookingQueue.submit(r3);
+
+        System.out.println("--- Booking Queue State ---");
+        System.out.println(bookingQueue);
+        System.out.println("All queued requests (in arrival order):");
+        while (!bookingQueue.isEmpty()) {
+            System.out.println("  " + bookingQueue.poll());
+        }
+        System.out.println();
+
         // Run Use Case 1 logic (if present)
         // UC1 class in the same Src folder provides a run() method for the use case
         try {
