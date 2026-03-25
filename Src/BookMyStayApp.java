@@ -18,6 +18,22 @@ public class BookMyStayApp {
         System.out.println("Welcome to " + appName + " " + version);
         System.out.println("Application started.\n");
 
+        // Use Case 2: Basic Room Types & Static Availability
+        SingleRoom single = new SingleRoom();
+        DoubleRoom doub = new DoubleRoom();
+        SuiteRoom suite = new SuiteRoom();
+
+        // Static availability variables (simple integers for demonstration)
+        int availableSingle = 5;
+        int availableDouble = 3;
+        int availableSuite = 1;
+
+        System.out.println("--- Room Types & Availability ---");
+        System.out.println(single + " -> Available: " + availableSingle);
+        System.out.println(doub + " -> Available: " + availableDouble);
+        System.out.println(suite + " -> Available: " + availableSuite);
+        System.out.println();
+
         // Run Use Case 1 logic (if present)
         // UC1 class in the same Src folder provides a run() method for the use case
         try {
