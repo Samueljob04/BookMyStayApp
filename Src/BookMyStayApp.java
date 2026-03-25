@@ -60,6 +60,30 @@ public class BookMyStayApp {
         }
         System.out.println();
 
+        // Use Case 6: Reservation Confirmation & Room Allocation
+        // Create a new queue to demonstrate allocation (re-queue sample reservations)
+        BookingQueue allocationQueue = new BookingQueue();
+        allocationQueue.submit(new Reservation("Dave", single.getType(), 2));
+        allocationQueue.submit(new Reservation("Eve", single.getType(), 1));
+        allocationQueue.submit(new Reservation("Frank", suite.getType(), 2));
+
+        BookingService bookingService = new BookingService();
+        Map<Reservation, String> allocations = bookingService.processQueue(allocationQueue, inventory);
+
+        System.out.println("--- Allocation Results ---");
+        for (Map.Entry<Reservation, String> e : allocations.entrySet()) {
+            Reservation r = e.getKey();
+            String assigned = e.getValue();
+            if (assigned != null) {
+                System.out.println(r.getGuestName() + " confirmed: " + r.getRoomType() + " -> " + assigned);
+            } else {
+                System.out.println(r.getGuestName() + " could not be allocated: " + r.getRoomType());
+            }
+        }
+        System.out.println("Current allocations by type: " + bookingService.getAllocations());
+        System.out.println("Inventory after allocation: " + inventory.snapshot());
+        System.out.println();
+
         // Run Use Case 1 logic (if present)
         // UC1 class in the same Src folder provides a run() method for the use case
         try {
