@@ -81,6 +81,47 @@ public class BookingService {
     }
 
     /**
+     * Returns a copy of roomId -> Reservation allocation map.
+     */
+    public Map<String, Reservation> getAllocationMap() {
+        return Collections.unmodifiableMap(new HashMap<>(allocationMap));
+    }
+
+    /**
+     * Restore allocations from persistent state. Replaces current allocation state.
+     */
+    public synchronized void restoreAllocations(Map<String, Set<String>> allocations, Map<String, Reservation> allocMap) {
+        allocatedByType.clear();
+        allAllocatedIds.clear();
+        allocationMap.clear();
+        counters.clear();
+        if (allocations != null) {
+            for (Map.Entry<String, Set<String>> e : allocations.entrySet()) {
+                String type = e.getKey();
+                Set<String> ids = new HashSet<>(e.getValue());
+                allocatedByType.put(type, ids);
+                for (String id : ids) {
+                    allAllocatedIds.add(id);
+                    // attempt to seed counters from ids like TYPE-###
+                    int dash = id.lastIndexOf('-');
+                    if (dash > 0 && dash < id.length()-1) {
+                        String suffix = id.substring(dash+1);
+                        try {
+                            int n = Integer.parseInt(suffix);
+                            String base = id.substring(0, dash);
+                            int existing = counters.getOrDefault(base, 0);
+                            counters.put(base, Math.max(existing, n));
+                        } catch (NumberFormatException ex) {
+                            // ignore
+                        }
+                    }
+                }
+            }
+        }
+        if (allocMap != null) allocationMap.putAll(allocMap);
+    }
+
+    /**
      * Find reservation associated with a room id, if any.
      */
     public Reservation getReservationForRoomId(String roomId) {

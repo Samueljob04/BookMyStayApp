@@ -84,33 +84,32 @@ public class BookMyStayApp {
         System.out.println("Inventory after allocation: " + inventory.snapshot());
         System.out.println();
 
-        // Use Case 10: Booking Cancellation & Inventory Rollback
-        CancellationService cancellationService = new CancellationService();
-        // pick any allocated id to cancel (if exists)
-        String toCancel = null;
-        for (Set<String> s : bookingService.getAllocations().values()) {
-            if (!s.isEmpty()) { toCancel = s.iterator().next(); break; }
-        }
-        if (toCancel != null) {
-            System.out.println("Cancelling reservation with id: " + toCancel);
-            boolean ok = cancellationService.cancel(toCancel, bookingService, inventory, bookingHistory);
-            System.out.println("Cancellation success: " + ok);
-            System.out.println("Inventory after cancellation: " + inventory.snapshot());
-            System.out.println("Rollback stack: " + cancellationService.rollbackStack());
-        } else {
-            System.out.println("No allocations to cancel.");
-        }
-        System.out.println();
-
-        // Use Case 11: Concurrent Booking Simulation (Thread Safety)
-        // Re-register inventory for simulation
-        RoomInventory simInventory = new RoomInventory();
-        simInventory.registerRoom(single, 10);
-        BookingService simBookingService = new BookingService();
+        // Use Case 12: Data Persistence & System Recovery
+        PersistenceService persistence = new PersistenceService();
+        String path = "bookmystay_snapshot.dat";
         try {
-            ConcurrentBookingDemo.runConcurrentDemo(simInventory, simBookingService);
-        } catch (InterruptedException ie) {
-            System.err.println("Concurrent demo interrupted: " + ie.getMessage());
+            persistence.save(path, inventory, bookingService, bookingHistory);
+            System.out.println("Saved snapshot to " + path);
+
+            // simulate restart: create new services and restore
+            RoomInventory restoredInventory = new RoomInventory();
+            BookingService restoredBookingService = new BookingService();
+            BookingHistory restoredHistory = new BookingHistory();
+
+            PersistenceService.Snapshot snap = persistence.load(path);
+            if (snap != null) {
+                // restore inventory
+                for (Map.Entry<String, Integer> e : snap.inventory.entrySet()) {
+                    // create a dummy Room to register type (Room objects not serialized)
+                    restoredInventory.setAvailability(e.getKey(), e.getValue());
+                }
+                restoredBookingService.restoreAllocations(snap.allocations, snap.allocMap);
+                for (Reservation r : snap.history) restoredHistory.record(r);
+                System.out.println("Restored inventory: " + restoredInventory.snapshot());
+                System.out.println("Restored allocations: " + restoredBookingService.getAllocations());
+            }
+        } catch (Exception ex) {
+            System.err.println("Persistence failed: " + ex.getMessage());
         }
         System.out.println();
 
