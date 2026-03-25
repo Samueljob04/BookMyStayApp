@@ -84,6 +84,18 @@ public class BookMyStayApp {
         System.out.println("Inventory after allocation: " + inventory.snapshot());
         System.out.println();
 
+        // Use Case 8: Booking History & Reporting
+        BookingHistory bookingHistory = new BookingHistory();
+        // record confirmed reservations
+        for (Map.Entry<Reservation, String> e : allocations.entrySet()) {
+            if (e.getValue() != null) bookingHistory.record(e.getKey());
+        }
+
+        ReportService reportService = new ReportService();
+        reportService.printBookingHistory(bookingHistory);
+        reportService.printSummary(inventory.snapshot(), bookingHistory);
+        System.out.println();
+
         // Use Case 7: Add-On Service Selection
         Service breakfast = new Service("Breakfast", 8.50);
         Service airport = new Service("Airport Pickup", 25.00);
